@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bitdecoding-fp4-kernel"
+version = "0.1.0"
+description = "NVFP4 paged-decode kernel interface"
+requires-python = ">=3.10"
+dependencies = [
+    "torch",
+    "nvidia-cutlass-dsl==4.6.0",
+    "quack-kernels==0.6.1",
+    "cuda-python",
+    "typing_extensions",
+    "apache-tvm-ffi==0.1.10",
+    "torch-c-dlpack-ext",
+]
+
+# Points `backend: CUSTOM` at NVFP4Backend in every vLLM process.
+[project.entry-points."vllm.general_plugins"]
+nvfp4_vllm = "nvfp4_vllm:register"
+
+[project.optional-dependencies]
+eval = [
+    "flashinfer-python",
+    "datasets",
+    "pandas",
+    "pyarrow",
+    "safetensors",
+    # RULER's synthetic-data generator.
+    "nltk",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

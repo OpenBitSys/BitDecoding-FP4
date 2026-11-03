@@ -1,0 +1,13 @@
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+_out/
+
+# Local environments, models, sidecars, run outputs, and LCB checkout.
+_local/
+
+# Datasets are staged by tools/prepare_data.py from public sources; only the
+# manifest is tracked.
+datasets/*
+!datasets/MANIFEST.json

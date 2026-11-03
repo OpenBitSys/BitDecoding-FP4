@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "description": "Provenance for every public dataset BitDecoding-FP4 reads. tools/prepare_data.py stages upstreams and rebuilds derived artifacts, then checks them against the metadata below.",
+  "upstream": {
+    "caskcsg/LongBench-Pro": {
+      "kind": "hf_dataset",
+      "revision": "4996884deae51f5e5d23c88da9d857fc54e5fa15",
+      "target": "datasets/longbench_pro",
+      "format": "datasets.save_to_disk",
+      "used_by": "eval/longbench_pro.py",
+      "license": "apache-2.0",
+      "paper": "https://arxiv.org/abs/2601.02872"
+    },
+    "openai/mrcr": {
+      "kind": "hf_dataset",
+      "files": [
+        "2needle/*.parquet",
+        "4needle/*.parquet",
+        "8needle/*.parquet"
+      ],
+      "target": "datasets/mrcr",
+      "approx_bytes": 1386000000,
+      "used_by": "the derived MRCR caches below",
+      "license": "mit",
+      "paper": "https://arxiv.org/abs/2409.12640"
+    },
+    "HuggingFaceH4/aime_2024": {
+      "kind": "hf_dataset",
+      "revision": "2fe88a2f1091d5048c0f36abc874fb997b3dd99a",
+      "target": "datasets/aime24/aime24.parquet",
+      "n_rows": 30,
+      "used_by": "eval/aime.py (30 problems; Avg@32 repeats are made at load time)",
+      "license": "mit"
+    },
+    "math-ai/aime25": {
+      "kind": "hf_dataset",
+      "revision": "563bb8404243c5f09de6ec262f2db674fe5bce9b",
+      "target": "datasets/aime25/aime25.parquet",
+      "n_rows": 30,
+      "used_by": "eval/aime25.py (30 problems; Avg@32 repeats are made at load time)"
+    },
+    "livecodebench/code_generation_lite": {
+      "kind": "hf_file",
+      "file": "test6.jsonl",
+      "target": "datasets/lcb_v6/prompts.jsonl",
+      "used_by": "eval/lcb.py (prompts only; tests stay in the LiveCodeBench checkout)"
+    },
+    "Qwen/Qwen3-4B-Thinking-2507": {
+      "kind": "hf_model",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "target": "_local/models/Qwen3-4B-Thinking-2507",
+      "native_context_tokens": 262144,
+      "config_sha256": "5beea1a4a34c62782bfb2f911c606741a3bab8f92d80a118fa053c28af12e8ba",
+      "model_index_sha256": "d6c42883a895dfef5b0080ed2116a1bcd764f558406b98923d675978a1abf29c",
+      "tokenizer_vocab_sha256": "6e949d8fec10c504f4207a43cdeac7d7961f7fd9894d256f14a8153bb5479b63",
+      "staging": "tools/prepare_data.py --steps long-context-model",
+      "used_by": "long-context KV-cache evaluation",
+      "license": "apache-2.0"
+    },
+    "NVIDIA/RULER": {
+      "kind": "github_source",
+      "revision": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+      "target": "datasets/ruler",
+      "used_by": "eval/ruler.py and tools/prepare_data.py --steps ruler",
+      "license": "apache-2.0",
+      "paper": "https://arxiv.org/abs/2404.06654"
+    },
+    "openai/simple-evals": {
+      "kind": "github_file",
+      "url": "https://raw.githubusercontent.com/openai/simple-evals/main/data/gpqa_diamond.csv",
+      "target": "datasets/gpqa/gpqa_diamond.parquet",
+      "n_rows": 198,
+      "used_by": "eval/gpqa.py"
+    }
+  },
+  "derived": {
+    "datasets/longbench_pro": {
+      "from": [
+        "caskcsg/LongBench-Pro"
+      ],
+      "rebuild": "tools/prepare_data.py --steps longbench-pro",
+      "n_rows": 1500,
+      "n_rows_by_bucket": {
+        "8k": 250,
+        "16k": 250,
+        "32k": 250,
+        "64k": 250,
+        "128k": 250,
+        "256k": 250
+      },
+      "content_sha256": "2c92f9e1d4b0c9473f07845e3ef4ddebed66e588da737c5a4aababfa8729bca6"
+    },
+    "datasets/aime24/aime24.parquet": {
+      "from": [
+        "HuggingFaceH4/aime_2024"
+      ],
+      "rebuild": "tools/prepare_data.py --steps aime24",
+      "n_rows": 30,
+      "bytes": 10258,
+      "sha256": "6baa662e42694fd7bc816c1c04f3b5db53a47710311baed44aab2f14d9eaff27",
+      "content_sha256": "9bccf152c547eacb67e188b26289f69237ec1356b7dbd0d0c5dbf859a806fae9"
+    },
+    "datasets/aime25/aime25.parquet": {
+      "from": [
+        "math-ai/aime25"
+      ],
+      "rebuild": "tools/prepare_data.py --steps aime25",
+      "n_rows": 30,
+      "bytes": 14312,
+      "sha256": "bfb7ed2e1546f341970901551c22da990bf6c3faf238859f2a4d53af97a48178",
+      "content_sha256": "80ab018e2b800e20f763566d197b5f07fe11a01e8bb9dcde1266014693ece3b1"
+    },
+    "datasets/mrcr/_filtered_le34000.jsonl": {
+      "from": [
+        "openai/mrcr"
+      ],
+      "rebuild": "tools/prepare_data.py --steps mrcr",
+      "rule": "Walk n_needles groups 2, 4, 8 in shard order; keep a row when sum(len(tokenizer(m['content'], add_special_tokens=False)) for m in json.loads(prompt)) <= 34000 with the Qwen3 tokenizer. Chat-template markup is deliberately not counted.",
+      "max_prompt_tokens": 34000,
+      "tokenizer": "Qwen/Qwen3-8B",
+      "n_rows": 913,
+      "n_rows_by_needles": {
+        "2": 304,
+        "4": 305,
+        "8": 304
+      },
+      "bytes": 67097346,
+      "sha256": "a7f659380654740dfb6f5c2151177331146933ade5fbe1af3892fc9d2a4ce876"
+    },
+    "datasets/mrcr/_filtered_le229120.jsonl": {
+      "from": [
+        "openai/mrcr",
+        "Qwen/Qwen3-4B-Thinking-2507"
+      ],
+      "rebuild": "tools/prepare_data.py --steps long-context-mrcr",
+      "max_prompt_tokens": 229120,
+      "tokenizer": "Qwen/Qwen3-4B-Thinking-2507",
+      "n_rows": 1724,
+      "bytes": 490601488,
+      "sha256": "dfbd2a0fe13e35011fddf1e7198bdc8543212b4d61f67f0ee6eaff20f01938b4"
+    },
+    "datasets/mrcr/_filtered_le98048.jsonl": {
+      "from": [
+        "openai/mrcr",
+        "Qwen/Qwen3-4B-Thinking-2507"
+      ],
+      "rebuild": "tools/prepare_data.py --steps long-context-mrcr --long-context-mrcr-budget 98048 --force",
+      "max_prompt_tokens": 98048,
+      "tokenizer": "Qwen/Qwen3-4B-Thinking-2507",
+      "n_rows": 1370,
+      "bytes": 210660975,
+      "sha256": "8d8d452993c4703a3b0eb7a7d8677ca065fe455beeff4bee06c12449717688e0"
+    },
+    "datasets/ruler/niah_122880.jsonl": {
+      "from": [
+        "NVIDIA/RULER",
+        "Qwen/Qwen3-4B-Thinking-2507"
+      ],
+      "rebuild": "tools/prepare_data.py --steps ruler --force",
+      "generator_revision": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+      "random_seed": 42,
+      "max_seq_length": 122880,
+      "num_samples_per_task": 500,
+      "n_rows": 4000,
+      "n_rows_by_task": {
+        "niah_single_1": 500,
+        "niah_single_2": 500,
+        "niah_single_3": 500,
+        "niah_multikey_1": 500,
+        "niah_multikey_2": 500,
+        "niah_multikey_3": 500,
+        "niah_multivalue": 500,
+        "niah_multiquery": 500
+      },
+      "tokenizer_vocab_sha256": "6e949d8fec10c504f4207a43cdeac7d7961f7fd9894d256f14a8153bb5479b63",
+      "sha256": "6ab64b49cbadd9eefdb8621ad3ff5c3afd6ac32017cf67e4eefccaaf0b2201dc"
+    },
+    "datasets/ruler/generator.json": {
+      "from": [
+        "NVIDIA/RULER",
+        "Qwen/Qwen3-4B-Thinking-2507"
+      ],
+      "rebuild": "tools/prepare_data.py --steps ruler --force",
+      "note": "Installation paths vary by host; each generated file and shard is verified using its recorded row count and SHA-256."
+    },
+    "datasets/gpqa/gpqa_diamond.parquet": {
+      "from": [
+        "openai/simple-evals"
+      ],
+      "n_rows": 198
+    },
+    "datasets/lcb_v6/prompts.jsonl": {
+      "from": [
+        "livecodebench/code_generation_lite"
+      ],
+      "n_rows": 175
+    }
+  }
+}

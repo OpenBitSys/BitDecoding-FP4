@@ -1,0 +1,49 @@
+<p align="center">
+  <img src="imgs/title.svg" alt="BitDecoding-FP4" width="550">
+</p>
+
+BitDecoding-FP4 is an accurate, high-performance **FP4 KV cache** for LLM
+decoding, integrated into vLLM as an out-of-tree `CUSTOM` backend.
+
+## Loss-less Accuracy
+
+BitDecoding-NVFP4 achieves **near-lossless accuracy**: across seven benchmarks,
+the average score stays within **0.5 percentage points of BF16 KV** on
+Qwen3-4B-Thinking-2507 and Qwen3-30B-A3B-Thinking-2507.
+
+![Paper accuracy table: scores on seven benchmarks and their average for both Qwen3 models.](imgs/accuracy.svg)
+
+## Higher Serving Throughput.
+
+On **NVIDIA B300**, BitDecoding-NVFP4 delivers **3.00×** (Qwen3-4B) and
+**2.62×** (Qwen3-30B-A3B) the BF16 KV throughput:
+
+![Paper serving throughput on B300: 64K input with TP=1 in the top row, and 128K input with TP=2 in the bottom row; each row compares both Qwen3 models.](imgs/e2e-serving-throughput.svg)
+
+> Concurrency: 1, 8, 16, 32, 64.
+
+## Setup
+
+### Requirements
+
+- 1 × NVIDIA B200 or B300 GPU (SM100 / SM103)
+- CUDA 13.0 or newer (NVIDIA driver 580+)
+- Python 3.12 and [uv](https://docs.astral.sh/uv/) (`pip install uv`)
+
+### Install
+
+```bash
+git clone --recurse-submodules https://github.com/OpenBitSys/BitDecoding-FP4.git
+cd BitDecoding-FP4
+bash tools/bootstrap_env.sh
+```
+
+All the required packages are then installed in `_local/envs/bd_fp4`.
+
+## Benchmark
+
+See the [performance benchmark guide](benchmark/README.md) for kernel and e2e-serving options.
+
+## Evaluation
+
+See the [accuracy evaluation guide](evaluation/README.md) for dataset installation and the evaluation benchmarks used in the paper.
