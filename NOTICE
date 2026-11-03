@@ -1,0 +1,34 @@
+Third-party notices
+===================
+
+The MIT license in LICENSE applies to original BitDecoding-FP4 code.
+Third-party components retain their own copyright notices and licenses.
+
+FlashAttention-derived helpers
+------------------------------
+The helpers under src/nvfp4_decode_kernel/_fa4/ include code derived from
+FlashAttention, except for the NVIDIA helper identified below.
+
+Upstream: https://github.com/Dao-AILab/flash-attention
+License: BSD 3-Clause; see src/nvfp4_decode_kernel/_fa4/LICENSE.
+Upstream authors: see src/nvfp4_decode_kernel/_fa4/AUTHORS and the copyright
+notices retained in the individual source files.
+
+NVIDIA CUTLASS DSL helper
+------------------------
+File: src/nvfp4_decode_kernel/_fa4/block_scaled_layout.py
+Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This software contains source code provided by NVIDIA Corporation.
+
+This file is governed by the NVIDIA CUTLASS DSL Software License Agreement,
+not the MIT or BSD license grants:
+https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+
+vLLM submodule
+--------------
+The third_party/vllm submodule is licensed under Apache License 2.0.
+Its license is included at third_party/vllm/LICENSE when the submodule is
+checked out. Third-party components within vLLM retain their own licenses.
+
+Upstream: https://github.com/vllm-project/vllm

@@ -1,11 +1,18 @@
 [build-system]
-requires = ["setuptools>=64"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "bitdecoding-fp4-kernel"
 version = "0.1.0"
 description = "NVFP4 paged-decode kernel interface"
+license = "MIT AND BSD-3-Clause AND LicenseRef-NvidiaProprietary"
+license-files = [
+    "LICENSE",
+    "NOTICE",
+    "src/nvfp4_decode_kernel/_fa4/LICENSE",
+    "src/nvfp4_decode_kernel/_fa4/AUTHORS",
+]
 requires-python = ">=3.10"
 dependencies = [
     "torch",

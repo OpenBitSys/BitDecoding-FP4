@@ -53,3 +53,8 @@ See the [performance benchmark guide](benchmark/README.md) for kernel and e2e-se
 ## Evaluation
 
 See the [accuracy evaluation guide](evaluation/README.md) for dataset installation and the evaluation benchmarks used in the paper.
+
+## License
+
+Original code is licensed under the [MIT License](LICENSE).
+Third-party components retain their own licenses; see [NOTICE](NOTICE).
