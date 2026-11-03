@@ -2,8 +2,10 @@
   <img src="imgs/title.svg" alt="BitDecoding-FP4" width="550">
 </p>
 
-BitDecoding-FP4 is an accurate, high-performance **FP4 KV cache** for LLM
-decoding, integrated into vLLM as an out-of-tree `CUSTOM` backend.
+BitDecoding-FP4 delivers accurate, high-performance LLM decoding through
+**algorithm-system co-design**, combining **FP4 KV-cache quantization** with
+native FP4 attention kernels. It integrates into vLLM as an out-of-tree `CUSTOM`
+backend.
 
 ## Loss-less Accuracy
 
