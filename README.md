@@ -15,9 +15,9 @@ Qwen3-4B-Thinking-2507 and Qwen3-30B-A3B-Thinking-2507.
 
 ![Paper accuracy table: scores on seven benchmarks and their average for both Qwen3 models.](imgs/accuracy.svg)
 
-Paper results on larger FP8-weight models:
+Results on larger FP8-weight models:
 
-![Paper accuracy and KV-cache memory table for GLM-4.7 (GQA) and Hy4-preview (MLA).](imgs/large-model-accuracy.svg)
+![Accuracy and KV-cache memory table for GLM-4.7 (GQA) and Hy4-preview (MLA).](imgs/large-model-accuracy.svg)
 
 ## Higher Serving Throughput.
 
