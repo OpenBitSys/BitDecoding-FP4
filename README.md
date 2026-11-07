@@ -7,6 +7,8 @@ BitDecoding-FP4 delivers accurate, high-performance LLM decoding through
 native FP4 attention kernels. It integrates into vLLM as an out-of-tree `CUSTOM`
 backend.
 
+![BitDecoding-FP4 system overview: accuracy-aware FP4 quantization, native FP4 decoding kernels, and a custom vLLM backend with paged FP4 KV storage and separate BF16 sink and recent-token buffers.](imgs/overview.svg)
+
 ## Loss-less Accuracy
 
 BitDecoding-NVFP4 achieves **near-lossless accuracy**: across seven benchmarks,

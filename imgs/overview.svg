@@ -1,0 +1,244 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="1000" viewBox="0 0 1440 1000" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">BitDecoding-FP4 system overview</title>
+  <desc id="desc">Three layers connect the BitDecoding-FP4 algorithm to native FP4 decoding and vLLM serving. The algorithm uses dual-residual query quantization, outlier-aware key quantization with smoothing and shared query/key rotation, and underflow-aware probability scaling. The kernel stacks the query terms for FP4 matrix multiplication, joins the scores in FP32, and uses transposed softmax with fused probability quantization before the FP4 probability-value product. LSE-weighted combination joins FP4 page splits and BF16 sink/recent-token attention. A custom vLLM backend manages device-side metadata, paged FP4 keys and values with block scales, and a separate BF16 buffer for the first 16 tokens and recent tokens. Full recent pages are quantized and promoted to the paged cache. The schematic contains no measured results.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1440" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f8fafc"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="58" y1="0" x2="348" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4778bd"/>
+      <stop offset="0.5" stop-color="#8461b0"/>
+      <stop offset="1" stop-color="#568b65"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1 1 9 5 1 9Z" fill="#718095"/></marker>
+    <marker id="blue-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 9 5 1 9Z" fill="#7194c7"/></marker>
+    <marker id="purple-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 9 5 1 9Z" fill="#8b72ac"/></marker>
+    <marker id="green-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1 9 5 1 9Z" fill="#56876d"/></marker>
+    <pattern id="blue-tiles" width="18" height="18" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="15" height="15" rx="3" fill="#7098cc"/></pattern>
+    <pattern id="light-tiles" width="18" height="18" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="15" height="15" rx="3" fill="#becfea"/></pattern>
+    <pattern id="purple-tiles" width="18" height="18" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="15" height="15" rx="3" fill="#9f88c2"/></pattern>
+    <pattern id="green-tiles" width="18" height="18" patternUnits="userSpaceOnUse"><rect x="1" y="1" width="15" height="15" rx="3" fill="#6c9d85"/></pattern>
+    <g id="kv-page">
+      <rect width="96" height="44" rx="7" fill="#eaf3ec" stroke="#b7d0c0"/>
+      <path d="M48 1V31M1 31H95" stroke="#b7d0c0"/>
+      <text x="24" y="22" class="page-label" text-anchor="middle">K</text>
+      <text x="72" y="22" class="page-label" text-anchor="middle">V</text>
+      <rect x="8" y="35" width="12" height="4" rx="2" fill="#88ad97"/>
+      <rect x="25" y="35" width="12" height="4" rx="2" fill="#88ad97"/>
+      <rect x="42" y="35" width="12" height="4" rx="2" fill="#88ad97"/>
+      <rect x="59" y="35" width="12" height="4" rx="2" fill="#88ad97"/>
+      <rect x="76" y="35" width="12" height="4" rx="2" fill="#88ad97"/>
+    </g>
+    <style>
+      text { font-family: Arial, Helvetica, sans-serif; fill: #24344b; }
+      .heading { font-size: 25px; font-weight: 700; letter-spacing: -0.4px; }
+      .card-heading { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
+      .body { font-size: 18px; }
+      .small { font-size: 17px; }
+      .muted { fill: #64748b; }
+      .blue { fill: #396aa6; }
+      .purple { fill: #77559b; }
+      .green { fill: #44765a; }
+      .amber { fill: #8b6d39; }
+      .label { font-size: 18px; font-weight: 700; }
+      .page-label { font-size: 17px; font-weight: 700; fill: #44765a; }
+      .flow { stroke: #718095; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="1438" height="998" rx="28" fill="url(#paper)" stroke="#e3e9f0"/>
+
+  <!-- Title and supported native FP4 formats. -->
+  <rect x="56" y="31" width="5" height="55" rx="2.5" fill="url(#accent)"/>
+  <text x="78" y="55" font-size="34" font-weight="700" letter-spacing="-1">BitDecoding-FP4</text>
+  <text x="79" y="85" font-size="20" class="muted">Native FP4 Decoding, from quantization to serving</text>
+  <text x="1384" y="45" text-anchor="end" font-size="14" font-weight="700" letter-spacing="2" class="muted">ALGORITHM–SYSTEM CO-DESIGN</text>
+  <rect x="1149" y="61" width="111" height="30" rx="15" fill="#edf3fa"/>
+  <text x="1204.5" y="82" text-anchor="middle" class="small blue" font-weight="700">NVFP4</text>
+  <rect x="1272" y="61" width="112" height="30" rx="15" fill="#f0edf7"/>
+  <text x="1328" y="82" text-anchor="middle" class="small purple" font-weight="700">MXFP4</text>
+
+  <!-- 01: The three algorithmic ingredients. -->
+  <rect x="32" y="112" width="1376" height="238" rx="22" fill="#eef4fb" stroke="#d9e5f4"/>
+  <rect x="56" y="130" width="36" height="30" rx="9" fill="#dbe8f8"/>
+  <text x="74" y="151" text-anchor="middle" class="small blue" font-weight="700">01</text>
+  <text x="105" y="153" class="heading">FP4 quantization algorithm</text>
+  <text x="1384" y="151" text-anchor="end" class="body blue">Preserve the attention signal</text>
+
+  <rect x="56" y="174" width="424" height="156" rx="14" fill="white" stroke="#dbe5f1"/>
+  <text x="78" y="201" class="card-heading">Dual-residual query quantization</text>
+  <text x="94" y="265" font-size="30" class="blue">Q′</text>
+  <text x="143" y="263" font-size="29" class="muted">≈</text>
+  <g transform="translate(186 228)">
+    <rect width="90" height="36" rx="4" fill="url(#blue-tiles)"/>
+  </g>
+  <text x="231" y="289" text-anchor="middle" class="small blue">primary FP4</text>
+  <text x="295" y="257" font-size="29" class="muted">+</text>
+  <g transform="translate(339 228)">
+    <rect width="90" height="36" rx="4" fill="url(#purple-tiles)"/>
+  </g>
+  <text x="384" y="289" text-anchor="middle" class="small purple">residual FP4</text>
+  <text x="78" y="315" class="small muted">Quantize Q′, then quantize its residual</text>
+
+  <rect x="508" y="174" width="424" height="156" rx="14" fill="white" stroke="#dbe5f1"/>
+  <text x="530" y="201" class="card-heading">Outlier-aware key quantization</text>
+  <g transform="translate(544 223)">
+    <rect width="72" height="54" rx="4" fill="url(#light-tiles)"/>
+    <rect x="19" y="1" width="15" height="15" rx="3" fill="#557cad"/>
+    <rect x="19" y="19" width="15" height="15" rx="3" fill="#557cad"/>
+    <rect x="19" y="37" width="15" height="15" rx="3" fill="#557cad"/>
+  </g>
+  <path d="M635 250H667" class="flow"/>
+  <rect x="688" y="225" width="54" height="50" rx="8" fill="#eef1fa" stroke="#cbd8ea"/>
+  <path d="M698 239 732 261M698 261 732 239M698 250H732" stroke="#8ca3c8" stroke-width="2"/>
+  <path d="M765 250H797" class="flow"/>
+  <g transform="translate(818 223)"><rect width="72" height="54" rx="4" fill="url(#blue-tiles)"/></g>
+  <text x="580" y="299" text-anchor="middle" class="small blue">K − μ</text>
+  <text x="715" y="299" text-anchor="middle" class="small blue">H</text>
+  <text x="854" y="299" text-anchor="middle" class="small blue">FP4</text>
+  <text x="530" y="319" class="small muted">Smooth K · rotate Q/K · select scales</text>
+
+  <rect x="960" y="174" width="424" height="156" rx="14" fill="white" stroke="#dbe5f1"/>
+  <text x="982" y="201" class="card-heading">Underflow-aware P scaling</text>
+  <g fill="#bed0e8">
+    <rect x="993" y="257" width="12" height="8" rx="3"/>
+    <rect x="1011" y="252" width="12" height="13" rx="3"/>
+    <rect x="1029" y="259" width="12" height="6" rx="3"/>
+    <rect x="1047" y="254" width="12" height="11" rx="3"/>
+  </g>
+  <path d="M1078 250H1102" class="flow"/>
+  <g fill="#7098cc">
+    <rect x="1124" y="239" width="12" height="26" rx="3"/>
+    <rect x="1142" y="223" width="12" height="42" rx="3"/>
+    <rect x="1160" y="246" width="12" height="19" rx="3"/>
+    <rect x="1178" y="230" width="12" height="35" rx="3"/>
+  </g>
+  <path d="M1209 250H1233" class="flow"/>
+  <g transform="translate(1256 228)"><rect width="90" height="36" rx="4" fill="url(#blue-tiles)"/></g>
+  <text x="1026" y="293" text-anchor="middle" class="small blue">P</text>
+  <text x="1157" y="293" text-anchor="middle" class="small blue">rescale</text>
+  <text x="1301" y="293" text-anchor="middle" class="small blue">FP4</text>
+  <text x="982" y="319" class="small muted">Exponent rescaling · adaptive block scale</text>
+
+  <!-- Dashed links express algorithm-to-kernel design, not execution order. -->
+  <g stroke="#7194c7" stroke-width="2" stroke-dasharray="4 5" marker-end="url(#blue-arrow)">
+    <path d="M268 350V400"/>
+    <path d="M720 350V400"/>
+    <path d="M1172 350V400"/>
+  </g>
+  <text x="283" y="381" class="small blue">two query terms</text>
+  <text x="735" y="381" class="small blue">FP4 keys + scales</text>
+  <text x="1187" y="381" class="small blue">P scaling rule</text>
+
+  <!-- 02: Native FP4 execution and mixed-precision output combination. -->
+  <rect x="32" y="402" width="1376" height="312" rx="22" fill="#f3f0f8" stroke="#e2daee"/>
+  <rect x="56" y="421" width="36" height="30" rx="9" fill="#e6dcf2"/>
+  <text x="74" y="442" text-anchor="middle" class="small purple" font-weight="700">02</text>
+  <text x="105" y="444" class="heading">Native FP4 decoding kernel</text>
+  <text x="1384" y="442" text-anchor="end" class="body purple">CuTe DSL · NVIDIA Blackwell</text>
+
+  <rect x="56" y="470" width="322" height="151" rx="14" fill="white" stroke="#ded5e9"/>
+  <text x="78" y="499" class="card-heading">Stacked query MMA</text>
+  <g transform="translate(89 520)"><rect width="54" height="54" rx="4" fill="url(#blue-tiles)"/></g>
+  <text x="164" y="554" font-size="27" class="muted">×</text>
+  <g transform="translate(205 520)">
+    <rect width="90" height="18" rx="3" fill="url(#blue-tiles)"/>
+    <rect y="18" width="90" height="18" rx="3" fill="url(#purple-tiles)"/>
+    <rect x="1" y="38" width="87" height="15" rx="3" fill="#f1edf6" stroke="#d9d0e5" stroke-dasharray="3 3"/>
+  </g>
+  <text x="312" y="534" class="small blue">Q₁</text>
+  <text x="312" y="553" class="small purple">Q₂</text>
+  <text x="116" y="598" text-anchor="middle" class="small blue">K</text>
+  <text x="250" y="598" text-anchor="middle" class="small purple">shared MMA tile</text>
+  <path d="M380 547H401" class="flow"/>
+
+  <rect x="406" y="470" width="170" height="151" rx="14" fill="white" stroke="#ded5e9"/>
+  <text x="491" y="499" text-anchor="middle" class="card-heading">FP32 join</text>
+  <text x="491" y="558" text-anchor="middle" font-size="28" class="purple">S₁ + S₂</text>
+  <text x="491" y="597" text-anchor="middle" class="small muted">full scores</text>
+  <path d="M578 547H600" class="flow"/>
+
+  <rect x="606" y="470" width="460" height="151" rx="14" fill="white" stroke="#ded5e9"/>
+  <text x="628" y="499" class="card-heading">Transposed softmax</text>
+  <text x="628" y="525" class="body purple">+ fused probability quantization</text>
+  <g transform="translate(634 540)">
+    <rect x="0" y="0" width="15" height="8" rx="2" fill="#9e88be"/><rect x="19" y="0" width="15" height="8" rx="2" fill="#c3b3d8"/><rect x="38" y="0" width="15" height="8" rx="2" fill="#c3b3d8"/>
+    <rect x="0" y="12" width="15" height="8" rx="2" fill="#9e88be"/><rect x="19" y="12" width="15" height="8" rx="2" fill="#c3b3d8"/><rect x="38" y="12" width="15" height="8" rx="2" fill="#c3b3d8"/>
+    <rect x="0" y="24" width="15" height="8" rx="2" fill="#9e88be"/><rect x="19" y="24" width="15" height="8" rx="2" fill="#c3b3d8"/><rect x="38" y="24" width="15" height="8" rx="2" fill="#c3b3d8"/>
+    <rect x="0" y="36" width="15" height="8" rx="2" fill="#9e88be"/><rect x="19" y="36" width="15" height="8" rx="2" fill="#c3b3d8"/><rect x="38" y="36" width="15" height="8" rx="2" fill="#c3b3d8"/>
+  </g>
+  <path d="M703 542V582" stroke="#8b72ac" stroke-width="2" marker-end="url(#purple-arrow)"/>
+  <g stroke="#a08abf" stroke-width="1.7" opacity="0.85">
+    <path d="M747 545 776 569 809 545 840 569M747 553 776 577 809 553 840 577M747 569 776 545 809 569 840 545M747 577 776 553 809 577 840 553"/>
+    <path d="M747 545H840M747 553H840M747 569H840M747 577H840" opacity="0.45"/>
+  </g>
+  <g fill="#896cae"><circle cx="747" cy="545" r="3"/><circle cx="747" cy="553" r="3"/><circle cx="747" cy="569" r="3"/><circle cx="747" cy="577" r="3"/><circle cx="840" cy="545" r="3"/><circle cx="840" cy="553" r="3"/><circle cx="840" cy="569" r="3"/><circle cx="840" cy="577" r="3"/></g>
+  <path d="M862 560H900" class="flow"/>
+  <g transform="translate(922 543)"><rect width="54" height="36" rx="4" fill="url(#purple-tiles)"/></g>
+  <text x="990" y="568" font-size="24" class="purple">Pᵀ</text>
+  <text x="661" y="606" text-anchor="middle" class="small muted">keys ↓</text>
+  <text x="797" y="606" text-anchor="middle" class="small muted">butterfly reduce</text>
+  <text x="951" y="606" text-anchor="middle" class="small muted">FP4 + scales</text>
+  <path d="M1068 547H1090" class="flow"/>
+
+  <rect x="1096" y="470" width="288" height="151" rx="14" fill="white" stroke="#ded5e9"/>
+  <text x="1118" y="499" class="card-heading">FP4 PV</text>
+  <text x="1240" y="554" text-anchor="middle" font-size="29" class="purple">Vᵀ × Pᵀ</text>
+  <text x="1240" y="595" text-anchor="middle" class="body muted">FP4 page split outputs</text>
+  <path d="M1240 622V644" stroke="#8b72ac" stroke-width="2" marker-end="url(#purple-arrow)"/>
+
+  <rect x="56" y="651" width="502" height="43" rx="11" fill="#e9e2f2"/>
+  <rect x="71" y="663" width="18" height="18" rx="4" fill="#967bb6"/>
+  <path d="M76 668H84V676H76Z" stroke="white" stroke-width="1.5"/>
+  <text x="101" y="679" class="body purple" font-weight="700">QK + PV on native FP4 Tensor Cores</text>
+  <rect x="606" y="651" width="426" height="43" rx="11" fill="#edf4ef" stroke="#c9ddcf"/>
+  <text x="819" y="679" text-anchor="middle" class="body green">BF16 sink + recent-token attention</text>
+  <path d="M1034 672H1054" class="flow"/>
+  <rect x="1060" y="651" width="255" height="43" rx="11" fill="#e6dcf1" stroke="#d7c8e8"/>
+  <text x="1187.5" y="678" text-anchor="middle" class="body purple" font-weight="700">LSE-weighted combine</text>
+  <path d="M1317 672H1345" class="flow"/>
+  <text x="1367" y="680" text-anchor="middle" font-size="27" class="purple" font-weight="700">O</text>
+
+  <!-- Serving supplies the cache and metadata; the kernel returns attention. -->
+  <path d="M479 764V718" stroke="#56876d" stroke-width="2" marker-end="url(#green-arrow)"/>
+  <text x="495" y="746" class="small green">paged KV + device metadata</text>
+  <path d="M1050 716V760" stroke="#8b72ac" stroke-width="2" marker-end="url(#purple-arrow)"/>
+  <text x="1066" y="746" class="small purple">attention output</text>
+
+  <!-- 03: vLLM integration. BF16 tokens are outside the paged FP4 cache. -->
+  <rect x="32" y="764" width="1376" height="212" rx="22" fill="#eef5f0" stroke="#d8e7dc"/>
+  <rect x="56" y="782" width="36" height="30" rx="9" fill="#dcebe0"/>
+  <text x="74" y="803" text-anchor="middle" class="small green" font-weight="700">03</text>
+  <text x="105" y="805" class="heading">vLLM integration</text>
+  <rect x="358" y="783" width="201" height="29" rx="14.5" fill="#dfece3"/>
+  <text x="458.5" y="803" text-anchor="middle" class="small green" font-weight="700">CUSTOM backend</text>
+  <text x="1384" y="803" text-anchor="end" class="body green">CUDA graph compatible</text>
+
+  <rect x="56" y="829" width="334" height="87" rx="13" fill="white" stroke="#d4e3d9"/>
+  <text x="77" y="856" class="card-heading">Device-side control</text>
+  <text x="77" y="882" class="small muted">Block tables · slots · lengths</text>
+  <text x="77" y="906" class="small green">Control → decode → promote</text>
+  <text x="77" y="950" class="body green">Device only · no host sync</text>
+
+  <rect x="414" y="829" width="492" height="87" rx="13" fill="white" stroke="#d4e3d9"/>
+  <text x="435" y="856" class="card-heading">Paged FP4 KV cache</text>
+  <use xlink:href="#kv-page" x="436" y="864"/>
+  <use xlink:href="#kv-page" x="550" y="864"/>
+  <use xlink:href="#kv-page" x="664" y="864"/>
+  <use xlink:href="#kv-page" x="778" y="864"/>
+  <text x="435" y="941" class="small green">128-token pages</text>
+  <text x="435" y="961" class="small muted">Packed K/V + scales</text>
+
+  <rect x="934" y="829" width="450" height="87" rx="13" fill="white" stroke="#d4e3d9"/>
+  <text x="955" y="856" class="card-heading">Separate BF16 buffer</text>
+  <rect x="954" y="866" width="180" height="39" rx="7" fill="#e6efe8" stroke="#c3d7ca"/>
+  <text x="1044" y="891" text-anchor="middle" class="small green" font-weight="700">Sink · 16 tokens</text>
+  <rect x="1149" y="866" width="214" height="39" rx="7" fill="#f8f3e8" stroke="#dfd3b9"/>
+  <text x="1256" y="891" text-anchor="middle" class="small amber" font-weight="700">Recent tokens</text>
+
+  <!-- Only a full recent-token page is quantized and promoted. -->
+  <path d="M1256 918V946H703V918" stroke="#56876d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#green-arrow)"/>
+  <rect x="766" y="932" width="430" height="28" rx="8" fill="#eef5f0"/>
+  <text x="981" y="952" text-anchor="middle" class="small green">Full recent page → quantize &amp; promote</text>
+</svg>
