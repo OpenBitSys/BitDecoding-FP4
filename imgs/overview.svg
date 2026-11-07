@@ -51,7 +51,7 @@
 
   <!-- Title and supported native FP4 formats. -->
   <rect x="56" y="31" width="5" height="55" rx="2.5" fill="url(#accent)"/>
-  <text x="78" y="55" font-size="34" font-weight="700" letter-spacing="-1">BitDecoding-FP4</text>
+  <text x="78" y="55" font-size="34" font-weight="700" letter-spacing="-1">Overview</text>
   <text x="79" y="85" font-size="20" class="muted">Native FP4 Decoding, from quantization to serving</text>
   <text x="1384" y="45" text-anchor="end" font-size="14" font-weight="700" letter-spacing="2" class="muted">ALGORITHM–SYSTEM CO-DESIGN</text>
   <rect x="1149" y="61" width="111" height="30" rx="15" fill="#edf3fa"/>
