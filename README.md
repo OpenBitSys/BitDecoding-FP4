@@ -2,6 +2,12 @@
   <img src="imgs/title.svg" alt="BitDecoding-FP4" width="550">
 </p>
 
+<p align="center">
+  <a href="https://arxiv.org/abs/2611.09825"><img src="https://img.shields.io/badge/arXiv-2611.09825-b31b1b.svg" alt="arXiv:2611.09825"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License: MIT"></a>
+  <a href="https://github.com/OpenBitSys"><img src="https://img.shields.io/badge/OpenBitSys-181717.svg?logo=github&amp;logoColor=white" alt="OpenBitSys"></a>
+</p>
+
 BitDecoding-FP4 delivers accurate, high-performance LLM decoding through
 **algorithm-system co-design**, combining **FP4 KV-cache quantization** with
 native FP4 attention kernels. It integrates into vLLM as an out-of-tree `CUSTOM`
@@ -62,3 +68,19 @@ See the [accuracy evaluation guide](evaluation/README.md) for dataset installati
 
 Original code is licensed under the [MIT License](LICENSE).
 Third-party components retain their own licenses; see [NOTICE](NOTICE).
+
+## Citation
+
+If you use BitDecoding-FP4 in your research, please cite:
+
+```bibtex
+@misc{du2026bitdecodingfp4nativefp4kv,
+      title={BitDecoding-FP4: Native FP4 KV Cache Decoding via Algorithm-System Co-Design},
+      author={Dayou Du and Woon Yee Ng and Guangming Sheng and Nick Lau and Jianyi Cheng and Luo Mai},
+      year={2026},
+      eprint={2611.09825},
+      archivePrefix={arXiv},
+      primaryClass={cs.AI},
+      url={https://arxiv.org/abs/2611.09825},
+}
+```
